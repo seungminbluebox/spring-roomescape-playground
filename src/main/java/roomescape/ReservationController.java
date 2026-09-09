@@ -36,7 +36,7 @@ public class ReservationController {
 
     @GetMapping("/reservation")
     public String adminPage() {
-        return "reservation";
+        return "new-reservation";
     }
 
     /// ///////////////////////////////////////////////////////////////////////
