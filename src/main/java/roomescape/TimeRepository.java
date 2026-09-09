@@ -1,9 +1,18 @@
 package roomescape;
 
+import java.net.URI;
+import java.sql.PreparedStatement;
 import java.time.LocalTime;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import roomescape.exception.NotFoundException;
 
 @Repository
 public class TimeRepository {
@@ -25,5 +34,52 @@ public class TimeRepository {
             ),
             id
         );
+    }
+
+    /////////////////////////////////////////////////
+    public List<Time> readTimes() {
+        String sql = "SELECT id, time FROM time";
+        return jdbcTemplate.query(
+            sql,
+            (rs, rowNum) -> Time.create(
+                rs.getLong("id"),
+                rs.getObject("time", LocalTime.class)
+            )
+        );
+    }
+    public void deleteTime(long id) {
+        int deletedCount = jdbcTemplate.update(
+            "DELETE FROM time WHERE id = ?",
+            id
+        );
+        if (deletedCount == 0) {
+            throw new NotFoundException("Reservation not found: id=" + id);
+        }
+    }
+    public Time createTime(TimeRequest timeRequest) {
+
+
+        Time newTime = Time.create(timeRequest.getTime());
+
+        String sql = "INSERT INTO time(time) VALUES (?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                sql,
+                new String[]{"id"}
+            );
+
+            ps.setObject(1, newTime.getTime());
+
+            return ps;
+        }, keyHolder);
+
+        long id = keyHolder.getKey().longValue();
+
+        Time time = newTime.withId(id);
+
+        return time;
     }
 }

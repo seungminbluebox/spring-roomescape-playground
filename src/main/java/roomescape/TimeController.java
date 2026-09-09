@@ -22,12 +22,10 @@ import roomescape.exception.NotFoundException;
 @Controller
 public class TimeController {
 
-    private final ReservationService reservationService;
-    private final JdbcTemplate jdbcTemplate;
+    private final TimeRepository timeRepository;
 
-    public TimeController(ReservationService reservationService, JdbcTemplate jdbcTemplate) {
-        this.reservationService = reservationService;
-        this.jdbcTemplate = jdbcTemplate;
+    public TimeController(TimeRepository timeRepository) {
+        this.timeRepository = timeRepository;
     }
 
 
@@ -41,32 +39,12 @@ public class TimeController {
         return ResponseEntity.badRequest().build();
     }
 
-
+//////////////////////////////////////////////////////////////////
     @PostMapping("/times")
     public ResponseEntity<Time> createTime(@RequestBody TimeRequest timeRequest) {
 
         timeRequest.validate();
-
-        Time newTime = Time.create(timeRequest.getTime());
-
-        String sql = "INSERT INTO time(time) VALUES (?)";
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                sql,
-                new String[]{"id"}
-            );
-
-            ps.setObject(1, newTime.getTime());
-
-            return ps;
-        }, keyHolder);
-
-        long id = keyHolder.getKey().longValue();
-
-        Time time = newTime.withId(id);
+        Time time=timeRepository.createTime(timeRequest);
 
         return ResponseEntity
             .created(URI.create("/times/" + time.getId()))
@@ -76,26 +54,13 @@ public class TimeController {
     @GetMapping("/times")
     @ResponseBody
     public List<Time> readTimes() {
-        String sql = "SELECT id, time FROM time";
-        return jdbcTemplate.query(
-            sql,
-            (rs, rowNum) -> Time.create(
-                rs.getLong("id"),
-                rs.getObject("time", LocalTime.class)
-            )
-        );
+        return timeRepository.readTimes();
     }
 
     @DeleteMapping("/times/{id}")
     public ResponseEntity<Void> deleteTime(@PathVariable long id) {
 
-        int deletedCount = jdbcTemplate.update(
-            "DELETE FROM time WHERE id = ?",
-            id
-        );
-        if (deletedCount == 0) {
-            throw new NotFoundException("Reservation not found: id=" + id);
-        }
+        timeRepository.deleteTime(id);
 
         return ResponseEntity.noContent().build();
     }
