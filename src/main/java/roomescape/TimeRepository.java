@@ -36,7 +36,7 @@ public class TimeRepository {
         );
     }
 
-    /////////////////////////////////////////////////
+    /// //////////////////////////////////////////////
     public List<Time> readTimes() {
         String sql = "SELECT id, time FROM time";
         return jdbcTemplate.query(
@@ -47,6 +47,7 @@ public class TimeRepository {
             )
         );
     }
+
     public void deleteTime(long id) {
         int deletedCount = jdbcTemplate.update(
             "DELETE FROM time WHERE id = ?",
@@ -56,8 +57,8 @@ public class TimeRepository {
             throw new NotFoundException("Reservation not found: id=" + id);
         }
     }
-    public Time createTime(TimeRequest timeRequest) {
 
+    public Time createTime(TimeRequest timeRequest) {
 
         Time newTime = Time.create(timeRequest.getTime());
 

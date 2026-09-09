@@ -39,12 +39,12 @@ public class TimeController {
         return ResponseEntity.badRequest().build();
     }
 
-//////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////
     @PostMapping("/times")
     public ResponseEntity<Time> createTime(@RequestBody TimeRequest timeRequest) {
 
         timeRequest.validate();
-        Time time=timeRepository.createTime(timeRequest);
+        Time time = timeRepository.createTime(timeRequest);
 
         return ResponseEntity
             .created(URI.create("/times/" + time.getId()))
