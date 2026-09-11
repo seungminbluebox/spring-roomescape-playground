@@ -1,7 +1,6 @@
 package roomescape;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.exception.InvalidReservationException;
 
 public record ReservationRequest(String name, LocalDate date, Long time) {

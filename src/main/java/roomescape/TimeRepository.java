@@ -1,18 +1,14 @@
 package roomescape;
 
-import java.net.URI;
 import java.sql.PreparedStatement;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.exception.NotFoundException;
+
 
 @Repository
 public class TimeRepository {

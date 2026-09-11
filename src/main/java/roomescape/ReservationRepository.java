@@ -39,7 +39,7 @@ public class ReservationRepository {
                 );
 
                 return Reservation.create(
-                    rs.getLong("reservaion_id"),
+                    rs.getLong("reservation_id"),
                     rs.getString("name"),
                     rs.getObject("date", LocalDate.class),
                     time
