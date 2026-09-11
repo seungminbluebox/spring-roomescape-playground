@@ -20,7 +20,7 @@ public class TimeController {
         this.timeService = timeService;
     }
 
-    @GetMapping("/time ")
+    @GetMapping("/time")
     public String showTimePage() {
         return "time";
     }
