@@ -1,5 +1,8 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.lang.reflect.Field;
@@ -13,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -54,10 +55,22 @@ public class MissionStepTest {
 
     @Test
     void 삼단계() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> time = new HashMap<>();
+        time.put("time", "10:00");
+
+        RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(time)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .header("Location", "/times/1")
+            .body("id", is(1));
+
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", "2023-08-05");
-        params.put("time", "15:40");
+        params.put("time", 1);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -107,6 +120,7 @@ public class MissionStepTest {
             .then().log().all()
             .statusCode(404);
     }
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -115,7 +129,8 @@ public class MissionStepTest {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
-            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
+            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null)
+                .next()).isTrue();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -123,7 +138,10 @@ public class MissionStepTest {
 
     @Test
     void 육단계() {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time) VALUES (?, ?, ?)", "브라운", "2023-08-05", "15:40");
+        jdbcTemplate.update("INSERT INTO time (time) VALUES (?)", "10:00");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id ) VALUES (?, ?, ?)",
+            "브라운",
+            "2023-08-05", 1);
 
         List<Reservation> reservations = RestAssured.given().log().all()
             .when().get("/reservations")
@@ -131,17 +149,30 @@ public class MissionStepTest {
             .statusCode(200).extract()
             .jsonPath().getList(".", Reservation.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+            Integer.class);
 
         assertThat(reservations.size()).isEqualTo(count);
     }
 
     @Test
     void 칠단계() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> time = new HashMap<>();
+        time.put("time", "10:00");
+
+        RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(time)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201)
+            .header("Location", "/times/1")
+            .body("id", is(1));
+
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", "2023-08-05");
-        params.put("time", "10:00");
+        params.put("time", 1);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -151,7 +182,8 @@ public class MissionStepTest {
             .statusCode(201)
             .header("Location", "/reservations/1");
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+            Integer.class);
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
@@ -159,7 +191,8 @@ public class MissionStepTest {
             .then().log().all()
             .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+            Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);
     }
 
@@ -187,6 +220,7 @@ public class MissionStepTest {
             .then().log().all()
             .statusCode(204);
     }
+
     @Test
     void 구단계() {
         Map<String, String> reservation = new HashMap<>();
@@ -201,6 +235,7 @@ public class MissionStepTest {
             .then().log().all()
             .statusCode(400);
     }
+
     @Autowired
     private ReservationController reservationController;
 
