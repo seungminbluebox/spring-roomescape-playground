@@ -20,6 +20,10 @@ public class TimeController {
         this.timeRepository = timeRepository;
     }
 
+    @GetMapping("/time ")
+    public String showTimePage() {
+        return "time";
+    }
 
     @PostMapping("/times")
     public ResponseEntity<Time> createTime(@RequestBody TimeRequest timeRequest) {
