@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TimeController {
 
-    private final TimeRepository timeRepository;
+    private final TimeService timeService;
 
-    public TimeController(TimeRepository timeRepository) {
-        this.timeRepository = timeRepository;
+    public TimeController(TimeService timeService) {
+        this.timeService = timeService;
     }
 
     @GetMapping("/time ")
@@ -27,9 +27,7 @@ public class TimeController {
 
     @PostMapping("/times")
     public ResponseEntity<Time> createTime(@RequestBody TimeRequest timeRequest) {
-
-        timeRequest.validate();
-        Time time = timeRepository.createTime(timeRequest);
+        Time time = timeService.createTime(timeRequest);
 
         return ResponseEntity
             .created(URI.create("/times/" + time.getId()))
@@ -39,13 +37,12 @@ public class TimeController {
     @GetMapping("/times")
     @ResponseBody
     public List<Time> readTimes() {
-        return timeRepository.readTimes();
+        return timeService.readTimes();
     }
 
     @DeleteMapping("/times/{id}")
     public ResponseEntity<Void> deleteTime(@PathVariable long id) {
-
-        timeRepository.deleteTime(id);
+        timeService.deleteTime(id);
 
         return ResponseEntity.noContent().build();
     }
