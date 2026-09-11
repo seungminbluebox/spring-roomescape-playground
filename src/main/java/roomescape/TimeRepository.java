@@ -32,7 +32,6 @@ public class TimeRepository {
         );
     }
 
-    /// //////////////////////////////////////////////
     public List<Time> readTimes() {
         String sql = "SELECT id, time FROM time";
         return jdbcTemplate.query(
